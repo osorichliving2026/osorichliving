@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OsoRich Living — Freedom Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf7f2;
+    --bg2: #f2ece0;
+    --ink: #1a1612;
+    --gold: #b8864e;
+    --gold-light: #d4a96a;
+    --sage: #5a7a5e;
+    --rust: #9e4e38;
+    --muted: #8a8070;
+    --border: rgba(184,134,78,0.2);
+    --white: #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── SCREENS ── */
+  .screen {
+    display: none;
+    flex-direction: column;
+    min-height: 100vh;
+    padding: 0;
+    animation: fadeIn 0.6s ease forwards;
+  }
+  .screen.active { display: flex; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── WELCOME ── */
+  .welcome {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 48px 24px;
+    background: linear-gradient(160deg, var(--bg) 0%, var(--bg2) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .welcome::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; right: -80px;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(184,134,78,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .welcome::before {
+    content: '';
+    position: absolute;
+    top: -60px; left: -60px;
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(90,122,94,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .logo-mark {
+    width: 56px; height: 56px;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px;
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .welcome h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(30px, 7vw, 48px);
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+
+  .welcome h1 em {
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .welcome p {
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--muted);
+    max-width: 480px;
+    margin: 0 auto 40px;
+  }
+
+  .lang-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .lang-btn {
+    padding: 14px 32px;
+    border-radius: 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1.5px solid var(--gold);
+    transition: all 0.25s;
+    letter-spacing: 0.02em;
+  }
+
+  .lang-btn.primary {
+    background: var(--gold);
+    color: var(--white);
+  }
+  .lang-btn.primary:hover { background: var(--gold-light); border-color: var(--gold-light); }
+
+  .lang-btn.secondary {
+    background: transparent;
+    color: var(--gold);
+  }
+  .lang-btn.secondary:hover { background: rgba(184,134,78,0.08); }
+
+  .welcome-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  /* ── QUESTION SCREEN ── */
+  .q-screen {
+    background: var(--bg);
+  }
+
+  .q-header {
+    padding: 20px 24px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .q-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .q-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .progress-bar {
+    height: 2px;
+    background: var(--border);
+    margin: 16px 24px 0;
+    border-radius: 1px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 1px;
+    transition: width 0.5s ease;
+  }
+
+  .q-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 48px 24px 32px;
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .pillar-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--sage);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .q-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(20px, 4vw, 28px);
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--ink);
+    margin-bottom: 36px;
+  }
+
+  /* Options */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+
+  .option {
+    padding: 16px 20px;
+    border: 1.5px solid var(--border);
+    border-radius: 2px;
+    background: var(--white);
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.4;
+    text-align: left;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .option:hover {
+    border-color: var(--gold);
+    background: rgba(184,134,78,0.04);
+  }
+
+  .option.selected {
+    border-color: var(--gold);
+    background: rgba(184,134,78,0.08);
+    color: var(--ink);
+  }
+
+  .option.selected::after {
+    content: '✓';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gold);
+    font-size: 14px;
+  }
+
+  /* Text input */
+  .q-input {
+    width: 100%;
+    padding: 16px 20px;
+    border: 1.5px solid var(--border);
+    border-radius: 2px;
+    background: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 32px;
+    min-height: 100px;
+  }
+
+  .q-input:focus { border-color: var(--gold); }
+  .q-input::placeholder { color: var(--muted); }
+
+  .q-next {
+    padding: 15px 40px;
+    background: var(--ink);
+    color: var(--white);
+    border: none;
+    border-radius: 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    align-self: flex-start;
+  }
+
+  .q-next:hover { background: var(--gold); }
+  .q-next:disabled { opacity: 0.3; cursor: default; }
+  .q-next:disabled:hover { background: var(--ink); }
+
+  /* ── LOADING ── */
+  .loading-screen {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 48px 24px;
+    background: var(--bg);
+  }
+
+  .loading-orb {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    border-top-color: var(--gold);
+    animation: spin 1.2s linear infinite;
+    margin: 0 auto 32px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-screen h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .loading-screen p {
+    font-size: 14px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* ── RESULT ── */
+  .result-screen {
+    background: var(--bg);
+    padding: 0 0 80px;
+  }
+
+  .result-hero {
+    background: var(--ink);
+    padding: 48px 24px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .result-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(184,134,78,0.15) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .result-hero-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .result-hero h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 5vw, 36px);
+    font-weight: 400;
+    color: #f5f0e8;
+    line-height: 1.3;
+    max-width: 500px;
+    margin: 0 auto 8px;
+  }
+
+  .result-hero p {
+    font-size: 14px;
+    color: rgba(245,240,232,0.5);
+    font-style: italic;
+    margin-top: 8px;
+  }
+
+  .result-body {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* Pillar bars */
+  .pillars-section {
+    margin-top: 40px;
+    margin-bottom: 40px;
+  }
+
+  .pillars-section h3 {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .pillar-row {
+    display: grid;
+    grid-template-columns: 140px 1fr 36px;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .pillar-row-name {
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  .pillar-bar-bg {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .pillar-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease 0.3s;
+  }
+
+  .pillar-score {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  /* Roadmap */
+  .roadmap-section {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 32px 28px;
+    margin-bottom: 24px;
+  }
+
+  .roadmap-section h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: var(--ink);
+    margin-bottom: 20px;
+    font-weight: 400;
+  }
+
+  .roadmap-section h3 span {
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .roadmap-content {
+    font-size: 15px;
+    line-height: 1.85;
+    color: #444;
+    white-space: pre-wrap;
+  }
+
+  .roadmap-content strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* CTA */
+  .result-cta {
+    text-align: center;
+    padding: 40px 24px 0;
+  }
+
+  .result-cta p {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  .cta-btn {
+    display: inline-block;
+    padding: 16px 40px;
+    background: var(--gold);
+    color: var(--white);
+    border: none;
+    border-radius: 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+    margin-bottom: 12px;
+  }
+
+  .cta-btn:hover { background: var(--gold-light); }
+
+  .restart-btn {
+    display: block;
+    margin-top: 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  .error-msg {
+    background: rgba(158,78,56,0.08);
+    border: 1px solid rgba(158,78,56,0.2);
+    color: var(--rust);
+    padding: 12px 16px;
+    font-size: 13px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  .door-box {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 28px;
+    margin-bottom: 12px;
+    text-align: left;
+  }
+  .door-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .door-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: var(--ink);
+    margin-bottom: 8px;
+    font-weight: 400;
+  }
+  .door-desc {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #555;
+    margin-bottom: 16px;
+  }
+  .door-btn {
+    display: inline-block;
+    padding: 13px 28px;
+    border-radius: 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+    transition: opacity 0.2s;
+  }
+  .door-btn:hover { opacity: 0.85; }
+  .door-btn.gold { background: var(--gold); color: var(--white); }
+  .door-btn.sage { background: var(--sage); color: var(--white); }
+  .door-btn.dark { background: var(--ink); color: var(--white); }
+
+
+    .pillar-row { grid-template-columns: 100px 1fr 28px; gap: 8px; }
+    .pillar-row-name { font-size: 12px; }
+    .lang-row { flex-direction: column; align-items: center; }
+    .lang-btn { width: 200px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── WELCOME ── -->
+  <div class="screen active" id="screen-welcome">
+    <div class="welcome" style="flex:1">
+      <div class="logo-mark">O</div>
+      <h1>Are you ready<br>to take <em>the leap?</em></h1>
+      <p id="welcome-p">Answer a few honest questions. We'll show you exactly where you are — and what your next step looks like. Private. No account needed. Built for the mama taking the leap, even scared.</p>
+      <div class="lang-row">
+        <button class="lang-btn primary" onclick="startAssessment('en')">Start My Assessment →</button>
+        <button class="lang-btn secondary" onclick="startAssessment('es')">Comenzar Mi Evaluación →</button>
+      </div>
+      <p class="welcome-note">5 minutes · Private · No account needed · Bilingual</p>
+      <p style="font-size:11px;color:var(--muted);max-width:440px;margin:12px auto 0;line-height:1.6;text-align:center;">OsoRich Living is a peer support and empowerment program. Jennifer Osorio is not a licensed therapist, counselor, or legal advisor. This assessment is not a substitute for professional mental health or legal services.<br><em>OsoRich Living es un programa de apoyo entre pares. Jennifer Osorio no es terapeuta ni asesora legal certificada. Esta evaluación no reemplaza los servicios profesionales de salud mental o legales.</em></p>
+    </div>
+  </div>
+
+  <!-- ── QUESTIONS ── -->
+  <div class="screen" id="screen-question">
+    <div class="q-header">
+      <div class="q-brand">OsoRich Living</div>
+      <div class="q-count" id="q-count">1 / 12</div>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:8%"></div>
+    </div>
+    <div class="q-body">
+      <div class="pillar-tag" id="q-pillar"></div>
+      <div class="q-text" id="q-text"></div>
+      <div class="error-msg" id="error-msg"></div>
+      <div class="options" id="options-container"></div>
+      <textarea class="q-input" id="text-input" placeholder="" style="display:none" rows="3"></textarea>
+      <button class="q-next" id="q-next-btn" onclick="nextQuestion()">Continue →</button>
+    </div>
+  </div>
+
+  <!-- ── LOADING ── -->
+  <div class="screen" id="screen-loading">
+    <div class="loading-screen" style="flex:1">
+      <div class="loading-orb"></div>
+      <h2 id="loading-title">Reading your answers…</h2>
+      <p id="loading-sub">Building your personal Freedom Roadmap</p>
+    </div>
+  </div>
+
+  <!-- ── EMAIL CAPTURE ── -->
+  <div class="screen" id="screen-email">
+    <div class="welcome" style="flex:1">
+      <div class="logo-mark">O</div>
+      <h1 id="email-title">Your Freedom<br>Roadmap is <em>ready.</em></h1>
+      <p id="email-sub">Enter your email and we'll send you a copy — yours to keep, private, always accessible.</p>
+      <div style="width:100%;max-width:400px;margin:0 auto 8px;">
+        <input type="email" id="email-input" placeholder="your@email.com" style="width:100%;padding:16px 20px;border:1.5px solid var(--border);border-radius:2px;background:var(--white);font-family:'DM Sans',sans-serif;font-size:15px;color:var(--ink);outline:none;margin-bottom:12px;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'" />
+        <button onclick="submitEmail()" style="width:100%;padding:15px;background:var(--gold);color:var(--white);border:none;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='var(--gold-light)'" onmouseout="this.style.background='var(--gold)'" id="email-submit-btn">Send My Roadmap →</button>
+      </div>
+      <button onclick="skipEmail()" style="margin-top:12px;background:none;border:none;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;color:var(--muted);cursor:pointer;text-decoration:underline;" id="email-skip-btn">Skip — just show my roadmap</button>
+      <p id="email-note" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:16px;letter-spacing:0.05em;">Your information is private and will never be shared.</p>
+    </div>
+  </div>
+
+  <!-- ── RESULT ── -->
+  <div class="screen" id="screen-result">
+    <div class="result-hero">
+      <div class="result-hero-label" id="result-label">Your Freedom Fingerprint</div>
+      <h2 id="result-name">Your leap starts here.</h2>
+      <p id="result-sub">OsoRich Living · Freedom Assessment</p>
+    </div>
+    <div class="result-body">
+      <div class="pillars-section">
+        <h3 id="pillars-heading">YOUR 6 PILLARS</h3>
+        <div id="pillar-bars"></div>
+      </div>
+      <div class="roadmap-section">
+        <h3><span id="roadmap-title">Your 90-Day Freedom Roadmap</span></h3>
+        <div class="roadmap-content" id="roadmap-content">Loading your roadmap…</div>
+      </div>
+      <div class="result-cta" id="result-cta">
+        <!-- dynamically populated by routeWoman() -->
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const QUESTIONS = {
+  en: [
+    { pillar: "Getting to Know You", text: "How are you feeling right now, in this moment?", type: "options", options: ["Exhausted and overwhelmed", "Hopeful but unsure where to start", "Numb — just going through the motions", "Ready. I want things to change."] },
+    { pillar: "Pillar 1 · Mind & Body", text: "When did you last do something just for your body — movement, rest, or something that felt good physically?", type: "options", options: ["I can't remember", "Within the last month", "I try but it's hard to stay consistent", "I have a regular practice"] },
+    { pillar: "Pillar 2 · Home & Safety", text: "How would you describe your current living situation?", type: "options", options: ["Unsafe — I'm still in a difficult environment", "Temporary or unstable — I'm in transition", "Safe but I'm still figuring out my space", "Stable — I feel secure where I am"] },
+    { pillar: "Pillar 2 · Home & Safety", text: "Do you have a plan or a safe place to go if you need to leave quickly?", type: "options", options: ["No — and that scares me", "Sort of — but it's not solid", "Yes, I have thought this through", "I'm already in a safe place"] },
+    { pillar: "Pillar 3 · Your Children", text: "If you have children, how are they doing emotionally right now?", type: "options", options: ["I don't have children", "Struggling — they've been affected by what's happening", "Managing, but I worry about them", "They seem okay — better than I expected", "Thriving — they have good support around them"] },
+    { pillar: "Pillar 4 · Economic Power", text: "What is your current relationship with income?", type: "options", options: ["I have no income of my own — I depend on someone else", "I have some income but it's not enough", "I'm working but building toward something more", "I have stable income and I'm growing"] },
+    { pillar: "Pillar 4 · Economic Power", text: "Do you have a skill, gift, or idea you've thought about turning into income?", type: "options", options: ["Yes — I know exactly what it is", "I have ideas but I don't know where to start", "Not yet — I haven't had space to think about it", "I already have something going"] },
+    { pillar: "Pillar 5 · Daily Resources", text: "Which of these do you need access to right now?", type: "options", options: ["Legal help or documentation", "Healthcare or mental health support", "Food, transportation, or childcare", "I have my basic needs covered"] },
+    { pillar: "Pillar 6 · Financial Literacy", text: "How do you feel about your financial knowledge — credit, savings, banking?", type: "options", options: ["Lost — money feels overwhelming and confusing", "I know the basics but I've never really built anything", "I'm learning and slowly making progress", "I'm solid — I want to grow from here"] },
+    { pillar: "Pillar 6 · Financial Literacy", text: "Do you have a bank account in your own name?", type: "options", options: ["No", "Yes, but I barely use it", "Yes — and I manage my own money", "Yes — and I'm actively saving or investing"] },
+    { pillar: "Your Vision", text: "What does your life look like one year from now, if everything went the way you hoped?", type: "text", placeholder: "Take your time. Write whatever comes to mind — even just a few words." },
+    { pillar: "Your First Step", text: "What feels most urgent to you right now — the thing you most need help with first?", type: "text", placeholder: "There's no wrong answer here." }
+  ],
+  es: [
+    { pillar: "Conociéndote", text: "¿Cómo te sientes ahora mismo, en este momento?", type: "options", options: ["Agotada y abrumada", "Con esperanza, pero sin saber por dónde empezar", "Entumecida — solo siguiendo el día a día", "Lista. Quiero que las cosas cambien."] },
+    { pillar: "Pilar 1 · Mente y Cuerpo", text: "¿Cuándo fue la última vez que hiciste algo solo para tu cuerpo — movimiento, descanso o algo que te hiciera sentir bien físicamente?", type: "options", options: ["No lo recuerdo", "En el último mes", "Lo intento pero es difícil mantenerlo", "Tengo una práctica regular"] },
+    { pillar: "Pilar 2 · Hogar y Seguridad", text: "¿Cómo describirías tu situación de vivienda actual?", type: "options", options: ["No es segura — sigo en un ambiente difícil", "Temporal o inestable — estoy en transición", "Segura, pero aún estoy organizando mi espacio", "Estable — me siento segura donde estoy"] },
+    { pillar: "Pilar 2 · Hogar y Seguridad", text: "¿Tienes un plan o un lugar seguro al que ir si necesitas salir rápidamente?", type: "options", options: ["No — y eso me asusta", "Más o menos — pero no es sólido", "Sí, he pensado en esto", "Ya estoy en un lugar seguro"] },
+    { pillar: "Pilar 3 · Tus Hijos", text: "Si tienes hijos, ¿cómo están emocionalmente en este momento?", type: "options", options: ["No tengo hijos", "Están sufriendo — se han visto afectados", "Están bien, pero me preocupan", "Parecen estar bien — mejor de lo esperado", "Están creciendo bien — tienen buen apoyo"] },
+    { pillar: "Pilar 4 · Poder Económico", text: "¿Cuál es tu relación actual con los ingresos?", type: "options", options: ["No tengo ingresos propios — dependo de alguien más", "Tengo algunos ingresos pero no son suficientes", "Estoy trabajando hacia algo más", "Tengo ingresos estables y estoy creciendo"] },
+    { pillar: "Pilar 4 · Poder Económico", text: "¿Tienes una habilidad, don o idea que hayas pensado en convertir en ingresos?", type: "options", options: ["Sí — sé exactamente qué es", "Tengo ideas pero no sé por dónde empezar", "Todavía no — no he tenido espacio para pensarlo", "Ya tengo algo en marcha"] },
+    { pillar: "Pilar 5 · Recursos Diarios", text: "¿A cuál de estos necesitas acceso ahora mismo?", type: "options", options: ["Ayuda legal o documentación", "Atención médica o salud mental", "Comida, transporte o cuidado de niños", "Mis necesidades básicas están cubiertas"] },
+    { pillar: "Pilar 6 · Educación Financiera", text: "¿Cómo te sientes respecto a tu conocimiento financiero — crédito, ahorros, banca?", type: "options", options: ["Perdida — el dinero me parece abrumador", "Sé lo básico pero nunca he construido nada", "Estoy aprendiendo y progresando poco a poco", "Estoy bien — quiero crecer desde aquí"] },
+    { pillar: "Pilar 6 · Educación Financiera", text: "¿Tienes una cuenta bancaria a tu nombre?", type: "options", options: ["No", "Sí, pero casi no la uso", "Sí — y manejo mi propio dinero", "Sí — y estoy ahorrando o invirtiendo activamente"] },
+    { pillar: "Tu Visión", text: "¿Cómo es tu vida dentro de un año, si todo saliera como esperas?", type: "text", placeholder: "Tómate tu tiempo. Escribe lo que se te venga a la mente — aunque sean solo unas palabras." },
+    { pillar: "Tu Primer Paso", text: "¿Qué se siente más urgente para ti ahora mismo — lo que más necesitas primero?", type: "text", placeholder: "No hay respuesta incorrecta aquí." }
+  ]
+};
+
+const PILLAR_NAMES = {
+  en: ["Mind & Body", "Home & Safety", "Children", "Economic Power", "Daily Resources", "Financial Literacy"],
+  es: ["Mente y Cuerpo", "Hogar y Seguridad", "Hijos", "Poder Económico", "Recursos Diarios", "Educación Financiera"]
+};
+
+const PILLAR_COLORS = ["#b8864e","#5a7a5e","#9e4e38","#7a6a4e","#4e7a8a","#6a5a7a"];
+
+let lang = 'en';
+let currentQ = 0;
+let answers = [];
+let selectedOption = null;
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  el.classList.add('active');
+  void el.offsetWidth;
+}
+
+function startAssessment(l) {
+  lang = l;
+  currentQ = 0;
+  answers = [];
+  renderQuestion();
+  showScreen('screen-question');
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[lang][currentQ];
+  const total = QUESTIONS[lang].length;
+  selectedOption = null;
+  window._currentOptions = q.type === 'options' ? q.options : [];
+
+  document.getElementById('q-count').textContent = `${currentQ + 1} / ${total}`;
+  document.getElementById('progress-fill').style.width = `${((currentQ + 1) / total) * 100}%`;
+  document.getElementById('q-pillar').textContent = q.pillar;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('error-msg').style.display = 'none';
+
+  const optCont = document.getElementById('options-container');
+  const textInput = document.getElementById('text-input');
+  const nextBtn = document.getElementById('q-next-btn');
+  nextBtn.disabled = true;
+
+  if (q.type === 'options') {
+    textInput.style.display = 'none';
+    optCont.style.display = 'flex';
+    optCont.innerHTML = q.options.map((o, i) =>
+      `<button class="option" data-idx="${i}">${o}</button>`
+    ).join('');
+
+    // Use event delegation on the container
+    optCont.onclick = function(e) {
+      const btn = e.target.closest('.option');
+      if (!btn) return;
+      optCont.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+      btn.classList.add('selected');
+      const idx = parseInt(btn.getAttribute('data-idx'));
+      selectedOption = window._currentOptions[idx];
+      nextBtn.disabled = false;
+    };
+  } else {
+    optCont.style.display = 'none';
+    optCont.onclick = null;
+    textInput.style.display = 'block';
+    textInput.placeholder = q.placeholder || '';
+    textInput.value = '';
+    textInput.oninput = () => { nextBtn.disabled = textInput.value.trim().length < 2; };
+    nextBtn.disabled = true;
+  }
+
+  nextBtn.textContent = currentQ === QUESTIONS[lang].length - 1
+    ? (lang === 'en' ? 'See My Roadmap →' : 'Ver Mi Plan →')
+    : (lang === 'en' ? 'Continue →' : 'Continuar →');
+}
+
+function selectOption(idx) {
+  // legacy stub — handled by event delegation now
+}
+
+function nextQuestion() {
+  const q = QUESTIONS[lang][currentQ];
+  const textInput = document.getElementById('text-input');
+  const answer = q.type === 'options' ? selectedOption : textInput.value.trim();
+
+  if (!answer) {
+    const err = document.getElementById('error-msg');
+    err.textContent = lang === 'en' ? 'Please choose an answer to continue.' : 'Por favor elige una respuesta para continuar.';
+    err.style.display = 'block';
+    return;
+  }
+
+  answers.push({ pillar: q.pillar, question: q.text, answer });
+  currentQ++;
+
+  if (currentQ < QUESTIONS[lang].length) {
+    renderQuestion();
+  } else {
+    showEmailCapture();
+  }
+}
+
+let userEmail = '';
+let pendingScores = null;
+let pendingRoadmap = null;
+
+function showEmailCapture() {
+  if (lang === 'es') {
+    document.getElementById('email-title').innerHTML = 'Tu Plan de Libertad<br>está <em>listo.</em>';
+    document.getElementById('email-sub').textContent = 'Ingresa tu correo y te enviamos una copia — tuya para siempre, privada, siempre accesible.';
+    document.getElementById('email-submit-btn').textContent = 'Enviar Mi Plan →';
+    document.getElementById('email-skip-btn').textContent = 'Omitir — solo mostrar mi plan';
+    document.getElementById('email-note').textContent = 'Tu información es privada y nunca será compartida.';
+    document.getElementById('email-input').placeholder = 'tucorreo@email.com';
+  }
+  showScreen('screen-email');
+}
+
+function submitEmail() {
+  const input = document.getElementById('email-input');
+  userEmail = input.value.trim();
+  if (!userEmail || !userEmail.includes('@')) {
+    input.style.borderColor = 'var(--rust)';
+    input.placeholder = lang === 'en' ? 'Please enter a valid email' : 'Por favor ingresa un correo válido';
+    return;
+  }
+  generateRoadmap();
+}
+
+function skipEmail() {
+  userEmail = '';
+  generateRoadmap();
+}
+
+async function sendToFormspree(scores, roadmap) {
+  if (!userEmail) return;
+  const answerSummary = answers.map((a, i) =>
+    `Q${i+1} [${a.pillar}]: ${a.question}\nAnswer: ${a.answer}`
+  ).join('\n\n');
+
+  const pillarNames = PILLAR_NAMES[lang];
+  const scoreVals = [scores.mind_body, scores.home_safety, scores.children, scores.economic, scores.resources, scores.financial];
+  const pillarSummary = pillarNames.map((n, i) => `${n}: ${scoreVals[i]}/10`).join(' | ');
+
+  try {
+    await fetch('https://formspree.io/f/mwvwwqvg', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        email: userEmail,
+        _replyto: userEmail,
+        _subject: `New OsoRich Living Assessment — ${userEmail}`,
+        language: lang === 'en' ? 'English' : 'Spanish',
+        user_email: userEmail,
+        pillar_scores: pillarSummary,
+        roadmap: roadmap,
+        answers: answerSummary
+      })
+    });
+  } catch(e) {
+    // Silent fail — don't interrupt user experience
+  }
+}
+
+async function generateRoadmap() {
+  showScreen('screen-loading');
+  if (lang === 'es') {
+    document.getElementById('loading-title').textContent = 'Leyendo tus respuestas…';
+    document.getElementById('loading-sub').textContent = 'Construyendo tu Plan de Libertad personal';
+  }
+
+  const answerSummary = answers.map((a, i) =>
+    `Q${i+1} [${a.pillar}]: ${a.question}\nAnswer: ${a.answer}`
+  ).join('\n\n');
+
+  const systemPrompt = lang === 'en'
+    ? `You are the heart of OsoRich Living — a bilingual, faith-grounded healing program for mothers and children recovering from abuse. You are warm, direct, and speak like a trusted friend who deeply understands what these women are going through. You are NOT clinical. You are NOT generic.
+
+Your task: Analyze these intake answers and produce two things:
+
+1. PILLAR_SCORES: A JSON block with scores 1-10 for each of the 6 pillars:
+{"mind_body": X, "home_safety": X, "children": X, "economic": X, "resources": X, "financial": X}
+Score 1-3 = urgent need, 4-6 = building, 7-10 = strength to build from.
+
+2. ROADMAP: A warm, personal 90-day roadmap written directly to this woman. 
+- Start with 2-3 sentences acknowledging where she is right now (use her specific answers)
+- Then write 3 phases: "Your First 30 Days", "Days 31–60", "Days 61–90"
+- Each phase has 2-3 specific, actionable steps focused on her highest-need pillars
+- End with one sentence of faith-grounded encouragement
+- Write in second person ("you", "your")
+- Total length: 300-400 words
+- Tone: warm, specific, grounded — NOT motivational-poster generic
+
+Format your entire response exactly like this:
+PILLAR_SCORES:
+{"mind_body": X, "home_safety": X, "children": X, "economic": X, "resources": X, "financial": X}
+
+ROADMAP:
+[your roadmap here]`
+    : `Eres el corazón de OsoRich Living — un programa de sanación bilingüe y basado en la fe para madres e hijos que se recuperan del abuso. Hablas como una amiga de confianza que entiende profundamente lo que estas mujeres están viviendo. NO eres clínica. NO eres genérica.
+
+Tu tarea: Analiza estas respuestas y produce dos cosas:
+
+1. PILLAR_SCORES: Un bloque JSON con puntuaciones del 1 al 10 para cada uno de los 6 pilares:
+{"mind_body": X, "home_safety": X, "children": X, "economic": X, "resources": X, "financial": X}
+1-3 = necesidad urgente, 4-6 = en construcción, 7-10 = fortaleza.
+
+2. ROADMAP: Un plan de 90 días cálido y personal escrito directamente a esta mujer.
+- Empieza con 2-3 oraciones reconociendo dónde está ella ahora (usa sus respuestas específicas)
+- Luego escribe 3 fases: "Tus Primeros 30 Días", "Días 31–60", "Días 61–90"
+- Cada fase tiene 2-3 pasos específicos y accionables enfocados en sus pilares de mayor necesidad
+- Termina con una oración de aliento basada en la fe
+- Escribe en segunda persona ("tú", "tu")
+- Longitud total: 300-400 palabras
+- Tono: cálido, específico, fundamentado — NO genérico
+
+Formatea tu respuesta exactamente así:
+PILLAR_SCORES:
+{"mind_body": X, "home_safety": X, "children": X, "economic": X, "resources": X, "financial": X}
+
+ROADMAP:
+[tu plan aquí]`;
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: "user", content: `Here are her intake answers:\n\n${answerSummary}` }]
+      })
+    });
+
+    const data = await response.json();
+    const text = data.content?.find(b => b.type === 'text')?.text || '';
+
+    // Parse scores
+    let scores = { mind_body: 4, home_safety: 4, children: 5, economic: 3, resources: 4, financial: 3 };
+    const scoresMatch = text.match(/PILLAR_SCORES:\s*(\{[^}]+\})/);
+    if (scoresMatch) {
+      try { scores = JSON.parse(scoresMatch[1]); } catch(e) {}
+    }
+
+    // Parse roadmap
+    let roadmap = lang === 'en'
+      ? "Your roadmap is being personalized. Please reach out to OsoRich Living directly for your full plan."
+      : "Tu plan está siendo personalizado. Comunícate con OsoRich Living directamente para tu plan completo.";
+    const roadmapMatch = text.match(/ROADMAP:\s*([\s\S]+)/);
+    if (roadmapMatch) roadmap = roadmapMatch[1].trim();
+
+    renderResult(scores, roadmap);
+  } catch (err) {
+    // Fallback
+    const fallbackScores = { mind_body: 4, home_safety: 5, children: 6, economic: 3, resources: 4, financial: 3 };
+    const fallbackRoadmap = lang === 'en'
+      ? "Thank you for sharing your story with us.\n\n**Your First 30 Days:**\nFocus on one thing — safety and stability. Whether that means solidifying your living situation, building one trusted support connection, or simply establishing a daily rhythm that is yours.\n\n**Days 31–60:**\nWith a foundation under you, we begin to look at income. What do you already know how to do? What have people always come to you for? That's where we start.\n\n**Days 61–90:**\nNow we bring your children into the healing. Not because they weren't part of it before — but because by now, you'll have something stable to offer them.\n\nYou were made for more than survival. This is where the building begins."
+      : "Gracias por compartir tu historia con nosotras.\n\n**Tus Primeros 30 Días:**\nEnfócate en una cosa — seguridad y estabilidad. Ya sea consolidando tu situación de vivienda, construyendo una conexión de apoyo de confianza, o simplemente estableciendo un ritmo diario que sea tuyo.\n\n**Días 31–60:**\nCon una base bajo tus pies, comenzamos a mirar los ingresos. ¿Qué ya sabes hacer? ¿Para qué siempre te busca la gente? Por ahí empezamos.\n\n**Días 61–90:**\nAhora traemos a tus hijos a la sanación. No porque no fueran parte de ella antes — sino porque para este momento, tendrás algo estable que ofrecerles.\n\nFuiste creada para más que sobrevivir. Aquí es donde empieza la construcción.";
+    renderResult(fallbackScores, fallbackRoadmap);
+  }
+}
+
+function renderResult(scores, roadmap) {
+  const names = PILLAR_NAMES[lang];
+  const scoreVals = [scores.mind_body, scores.home_safety, scores.children, scores.economic, scores.resources, scores.financial];
+
+  // Pillar bars
+  const barsHtml = names.map((name, i) => {
+    const pct = Math.round((scoreVals[i] / 10) * 100);
+    const label = lang === 'en'
+      ? (scoreVals[i] <= 3 ? 'Needs attention' : scoreVals[i] <= 6 ? 'Building' : 'Strength')
+      : (scoreVals[i] <= 3 ? 'Atención urgente' : scoreVals[i] <= 6 ? 'En construcción' : 'Fortaleza');
+    return `
+      <div class="pillar-row">
+        <div class="pillar-row-name">${name}</div>
+        <div class="pillar-bar-bg">
+          <div class="pillar-bar-fill" style="width:0%;background:${PILLAR_COLORS[i]}" data-width="${pct}"></div>
+        </div>
+        <div class="pillar-score">${scoreVals[i]}/10</div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('pillar-bars').innerHTML = barsHtml;
+
+  if (lang === 'es') {
+    document.getElementById('result-label').textContent = 'Tu Huella de Libertad';
+    document.getElementById('result-name').textContent = 'Tu salto empieza aquí.';
+    document.getElementById('result-sub').textContent = 'OsoRich Living · Evaluación de Libertad';
+    document.getElementById('pillars-heading').textContent = 'TUS 6 PILARES';
+    document.getElementById('roadmap-title').textContent = 'Tu Plan de Libertad de 90 Días';
+  // pillar bars and roadmap rendered above
+  }
+
+  // Format roadmap
+  const formatted = roadmap
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+  document.getElementById('roadmap-content').innerHTML = formatted;
+
+  showScreen('screen-result');
+  sendToFormspree(scores, roadmap);
+  routeWoman(scores);
+
+  // Animate bars after render
+  setTimeout(() => {
+    document.querySelectorAll('.pillar-bar-fill').forEach(bar => {
+      bar.style.width = bar.dataset.width + '%';
+    });
+  }, 200);
+}
+
+function routeWoman(scores) {
+  const safety = scores.home_safety || 4;
+  const economic = scores.economic || 4;
+  const financial = scores.financial || 4;
+  const avgReadiness = (safety + economic + financial) / 3;
+
+  const isEN = lang === 'en';
+  let html = '';
+
+  if (safety <= 3) {
+    // DOOR 1 — Still in danger, needs private digital support
+    html = `
+      <div class="door-box" style="border-left:4px solid var(--sage);">
+        <div class="door-label" style="color:var(--sage)">${isEN ? 'Your Next Step · Private & Safe' : 'Tu Próximo Paso · Privado y Seguro'}</div>
+        <div class="door-title">${isEN ? 'Start where you are.' : 'Empieza donde estás.'}</div>
+        <div class="door-desc">${isEN
+          ? 'You don\'t need to travel or spend money right now. Follow OsoRich Living on Instagram for daily support, resources, and community — privately, from your phone, on your terms.'
+          : 'No necesitas viajar ni gastar dinero ahora mismo. Sigue a OsoRich Living en Instagram para apoyo diario, recursos y comunidad — de forma privada, desde tu teléfono, en tus términos.'
+        }</div>
+        <a href="https://instagram.com/osorichliving" target="_blank" class="door-btn sage" style="margin-right:10px;margin-bottom:8px;display:inline-block;">
+          ${isEN ? 'Follow @OsoRichLiving →' : 'Seguir @OsoRichLiving →'}
+        </a>
+        <a href="https://buy.stripe.com/4gM28t1kh8rlfqaezlgIo0a" target="_blank" class="door-btn gold" style="display:inline-block;">
+          ${isEN ? 'Get the Freedom Guide — $26 →' : 'Obtener la Guía de Libertad — $26 →'}
+        </a>
+      </div>
+      <p style="font-size:13px;color:var(--muted);text-align:center;margin-top:8px;font-style:italic;">
+        ${isEN ? 'You are not alone. We see you.' : 'No estás sola. Te vemos.'}
+      </p>`;
+
+  } else if (avgReadiness <= 6) {
+    // DOOR 2 — Out but rebuilding, needs digital community + retreat on horizon
+    html = `
+      <div class="door-box" style="border-left:4px solid var(--gold);">
+        <div class="door-label" style="color:var(--gold)">${isEN ? 'Your Next Step · Build Your Foundation' : 'Tu Próximo Paso · Construye tu Base'}</div>
+        <div class="door-title">${isEN ? 'You\'re already rebuilding.' : 'Ya estás reconstruyendo.'}</div>
+        <div class="door-desc">${isEN
+          ? 'Follow OsoRich Living for ongoing support, community, and resources as you build. When you\'re ready to talk through your results personally, book a Clarity Call — 46 minutes with Jen, $46.'
+          : 'Sigue a OsoRich Living para apoyo continuo, comunidad y recursos mientras construyes. Cuando estes lista para hablar sobre tus resultados personalmente, reserva una Llamada de Claridad — 46 minutos con Jen, $46.'
+        }</div>
+        <a href="https://instagram.com/osorichliving" target="_blank" class="door-btn gold" style="margin-right:10px;margin-bottom:8px;display:inline-block;">
+          ${isEN ? 'Follow @OsoRichLiving →' : 'Seguir @OsoRichLiving →'}
+        </a>
+        <a href="https://buy.stripe.com/4gM28t1kh8rlfqaezlgIo0a" target="_blank" class="door-btn sage" style="margin-right:10px;margin-bottom:8px;display:inline-block;">
+          ${isEN ? 'Get the Freedom Guide — $26 →' : 'Obtener la Guía — $26 →'}
+        </a>
+        <a href="https://calendly.com/osorichliving" target="_blank" class="door-btn dark" style="display:inline-block;">
+          ${isEN ? 'Book a Clarity Call — $46 →' : 'Reservar Llamada de Claridad — $46 →'}
+        </a>
+      </div>
+      <p style="font-size:13px;color:var(--muted);text-align:center;margin-top:8px;font-style:italic;">
+        ${isEN ? 'The retreat is for you and your children. You don\'t have to do this alone.' : 'El retiro es para ti y tus hijos. No tienes que hacer esto sola.'}
+      </p>`;
+
+  } else {
+    // DOOR 3 — Ready, stable, time for the full retreat
+    html = `
+      <div class="door-box" style="border-left:4px solid var(--ink);">
+        <div class="door-label" style="color:var(--gold)">${isEN ? 'Your Next Step · You\'re Ready' : 'Tu Próximo Paso · Estás Lista'}</div>
+        <div class="door-title">${isEN ? 'The retreat was made for this moment.' : 'El retiro fue hecho para este momento.'}</div>
+        <div class="door-desc">${isEN
+          ? 'You\'re ready to go deeper. Book a personal Clarity Call with Jen — 46 minutes with your assessment results and a personalized action plan. $46. Limited spots open in May.'
+          : 'Estas lista para ir mas profundo. Reserva una Llamada de Claridad personal con Jen — 46 minutos con tus resultados y un plan de accion personalizado. $46. Lugares limitados disponibles en mayo.'
+        }</div>
+        <a href="https://calendly.com/osorichliving" target="_blank" class="door-btn gold" style="margin-right:10px;margin-bottom:8px;display:inline-block;">
+          ${isEN ? 'Book My Clarity Call — $46 →' : 'Reservar Mi Llamada — $46 →'}
+        </a>
+        <a href="https://buy.stripe.com/4gM28t1kh8rlfqaezlgIo0a" target="_blank" class="door-btn sage" style="margin-right:10px;margin-bottom:8px;display:inline-block;">
+          ${isEN ? 'Get the Freedom Guide — $26 →' : 'Obtener la Guía — $26 →'}
+        </a>
+        <a href="https://instagram.com/osorichliving" target="_blank" class="door-btn dark" style="display:inline-block;">
+          ${isEN ? 'Follow for Updates' : 'Seguir para Actualizaciones'}
+        </a>
+      </div>
+      <p style="font-size:13px;color:var(--muted);text-align:center;margin-top:8px;font-style:italic;">
+        ${isEN ? 'Scholarship seats available. No woman turned away for lack of funds.' : 'Hay becas disponibles. Ninguna mujer será rechazada por falta de fondos.'}
+      </p>`;
+  }
+
+  // Always add restart
+  html += `<div style="text-align:center;margin-top:20px;">
+    <button class="restart-btn" onclick="restart()">${isEN ? 'Start over' : 'Comenzar de nuevo'}</button>
+  </div>`;
+
+  document.getElementById('result-cta').innerHTML = html;
+}
+
+function restart() {
+  showScreen('screen-welcome');
+}
+</script>
+</body>
+</html>
